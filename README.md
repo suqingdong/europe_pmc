@@ -8,36 +8,36 @@ python3 -m pip install europe_pmc
 ## Usage
 ### CMD
 ```bash
-europe_pmc --help
+epmc --help
 
 # single download
-europe_pmc 30003000  # PMID
-europe_pmc PMC6039336 # PMCID
-europe_pmc 10.1007/s13205-018-1330-z # DOI
-europe_pmc "Identification of miRNAs and their targets in regulating tuberous root development" # Title
+epmc 30003000  # PMID
+epmc PMC6039336 # PMCID
+epmc 10.1007/s13205-018-1330-z # DOI
+epmc "Identification of miRNAs and their targets in regulating tuberous root development" # Title
 
 # batch download
-europe_pmc 30003000 30003001 30003002
+epmc 30003000 30003001 30003002
 
 # batch download from a file
-europe_pmc pmid.list
+epmc pmid.list
 
 # specific output
-europe_pmc pmid.list --outdir paper --outfile {pubYear}.{pmid}.{title}.pdf
+epmc pmid.list --outdir paper --outfile {pubYear}.{pmid}.{title}.pdf
 
 # multithreads download
-europe_pmc pmid.list --threads 4
+epmc pmid.list --threads 4
 
 # list only
-europe_pmc pmid.list --list
+epmc pmid.list --list
 
 # show information only
-europe_pmc pmid.list --info
+epmc pmid.list --info
 ```
 
 ### Python
 ```python
-from europe_pmc import EuropePMC
+from epmc import EuropePMC
 
 pmc = EuropePMC()
 

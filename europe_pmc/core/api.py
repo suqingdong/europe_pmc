@@ -15,9 +15,9 @@ class PMCResult(object):
         return f'PMCResult<PMCID:{self.pmcid}>'
 
 
-    def save(self, outfile=None, **kwargs):
+    def save(self, outfile=None, outdir='.', **kwargs):
         if hasattr(self, 'pdf_url'):
-            util.download(self.pdf_url, outfile=outfile, **kwargs)
+            util.download(self.pdf_url, outfile=outfile, outdir=outdir, **kwargs)
             return True
 
         return False

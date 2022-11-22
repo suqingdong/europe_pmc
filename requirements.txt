@@ -1,2 +1,5 @@
+tqdm
 click
-pmc_id_converter
+requests
+simple_loggers
+human_readable

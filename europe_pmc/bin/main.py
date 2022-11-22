@@ -8,9 +8,44 @@ import click
 from europe_pmc import EuropePMC, version_info
 
 
+__epilog__ = click.style('''
+
+\b
+examples:
+    \b
+    # single download PMID, PMCID, DOI or Title
+    epmc --help
+    epmc 30003000  # PMID
+    epmc PMC6039336 # PMCID
+    epmc 10.1007/s13205-018-1330-z # DOI
+    epmc "Identification of miRNAs and their targets in regulating tuberous root development" # Title
+    \b
+    # batch download
+    epmc 30003000 30003001 30003002
+    \b
+    # batch download from a file
+    epmc pmid.list
+    \b
+    # specific output
+    epmc pmid.list --outdir paper --outfile {{pubYear}}.{{pmid}}.{{title}}.pdf
+    \b
+    # multithreads download
+    epmc pmid.list --threads 4
+    \b
+    # list only
+    epmc pmid.list --list
+    \b
+    # show information only
+    epmc pmid.list --info
+
+contact: {author} <{author_email}>
+''', fg='cyan').format(**version_info)
+
 @click.command(
-    name='europe_pmc',
+    name='epmc',
     no_args_is_help=True,
+    epilog=__epilog__,
+    help=click.style('Open Access PDF Downloader with EuropePMC', fg='green', bold=True, italic=True),
 )
 @click.argument('term', nargs=-1)
 @click.option('-O', '--outdir', help='the output directory', default='pdf', show_default=True)
@@ -60,15 +95,15 @@ def cli(**kwargs):
             failed.append({'term': term, 'error': f'no pdf for PMID:{res.pmid}'})
             continue
 
-        try:
-            out = outfile.format(**res.data)
-
-        except KeyError as e:
-            pmc.logger.warning(f'bad outfile format: {outfile}')
-            # print(res.data)
-            out = f'{term}.pdf'
-
-        res.outfile = Path(outdir).joinpath(out)
+        out = None
+        if outfile:
+            try:
+                out = outfile.format(**res.data)
+            except Exception:
+                pmc.logger.warning(f'bad outfile format: {outfile}')
+            
+        res.outfile = out
+        res.outdir = outdir
         results.append(res)
 
     if kwargs['list']:
@@ -82,7 +117,7 @@ def cli(**kwargs):
     else:
         pool = ThreadPool(kwargs['threads'])
         for res in results:
-            pool.apply_async(res.save, args=(res.outfile,))
+            pool.apply_async(res.save, kwds=dict(outfile=res.outfile, outdir=res.outdir))
         pool.close()
         pool.join()
         pmc.logger.info(f'all files are saved in: {outdir}')
