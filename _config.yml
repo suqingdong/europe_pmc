@@ -1,1 +1,3 @@
-theme: minima
+theme: jekyll-theme-minimal
+title: EPMC
+description: Open Access PDF Downloader with EuropePMC
