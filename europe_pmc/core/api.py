@@ -1,5 +1,6 @@
 import requests
 from simple_loggers import SimpleLogger
+from webrequests import WebRequest
 
 from europe_pmc import util
 
@@ -14,9 +15,8 @@ class PMCResult(object):
     def __str__(self):
         return f'PMCResult<PMCID:{self.pmcid}>'
 
-
     def save(self, outfile=None, outdir='.', **kwargs):
-        if hasattr(self, 'pdf_url'):
+        if hasattr(self, 'pdf_url') and self.pdf_url:
             util.download(self.pdf_url, outfile=outfile, outdir=outdir, **kwargs)
             return True
 
@@ -49,7 +49,7 @@ class EuropePMC(object):
 
         pmcid = data.get('pmcid')
         if pmcid:
-            data['pdf_url'] = f'https://europepmc.org/backend/ptpmcrender.fcgi?accid={pmcid}&blobtype=pdf'
+            data['pdf_url'] = self.get_pdf_url(pmcid)
 
         result = PMCResult(data)
 
@@ -84,6 +84,34 @@ class EuropePMC(object):
         error = f'no result found: {_id} [{source}]' if not result else ''
 
         return {**result, '_error': error}
+
+    def full_text_soup(self, pmcid):
+        """full text xml
+        """
+        url = self.REST_URL + f'/{pmcid}/fullTextXML'
+        print(url)
+        soup = WebRequest.get_soup(url)
+        return soup
+    
+    def get_filename(self, pmcid):
+        url = f'https://europepmc.org/api/fulltextRepo?pmcId={pmcid}&type=METADATA'
+        data = requests.get(url).json()
+        files = data.get('files') or []
+        for file in files:
+            if file['type'] == 'pdf':
+                filename = file['filename']
+                return filename
+
+    def get_pdf_url(self, pmcid):
+        """get pdf url
+        """
+        filename = self.get_filename(pmcid)
+        if filename:
+            pdf_url = f'https://europepmc.org/api/fulltextRepo?pmcId={pmcid}&type=FILE&fileName={filename}&mimeType=application/pdf&version=1&pmc_pageType=pdf&pmc_domain=null'
+            self.logger.debug(f'pdf_url: {pdf_url}')
+            return pdf_url
+
+        
 
 
 if __name__ == '__main__':

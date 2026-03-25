@@ -37,7 +37,7 @@ epmc pmid.list --info
 
 ### Python
 ```python
-from epmc import EuropePMC
+from europe_pmc import EuropePMC
 
 pmc = EuropePMC()
 

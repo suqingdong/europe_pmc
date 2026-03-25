@@ -3,3 +3,4 @@ click
 requests
 simple_loggers
 human_readable
+webrequests
